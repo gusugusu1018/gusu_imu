@@ -1,19 +1,25 @@
 #include <iostream>
+#include <chrono>
+#include <iomanip>
 
 #include "mpu.hpp"
 
 int main(int argc, char **argv) {
-	double  a[3], g[3], m[3];
-	struct  timespec ts1, ts2;
+	std::chrono::system_clock::time_point now, old;
+	old = std::chrono::system_clock::now();
 	Gusumpu mpu(1,0x68);
+	std::cout << std::fixed << std::setprecision(5) << std::showpos;
 	while(1) {
-		clock_gettime( CLOCK_MONOTONIC, &ts1 );
-		mpu.mpu_read( a, g, m );
-		clock_gettime( CLOCK_MONOTONIC, &ts2 );
-		printf("t: %-5d ", (int)( ts2.tv_sec - ts1.tv_sec ) * 1000000 + (int)( ts2.tv_nsec - ts1.tv_nsec ) / 1000);
-		printf("Ax: %-8.2f Ay: %-8.2f Az: %-8.2f ", a[0], a[1], a[2]);
-		printf("Gx: %-8.2f Gy: %-8.2f Gz: %-8.2f ", g[0], g[1], g[2]);
-		printf("Mx: %-8.2f My: %-8.2f Mz: %-8.2f\n", m[0], m[1], m[2]);
+		now = std::chrono::system_clock::now();
+		double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(now - old).count() / 1000.0);
+    		std::cout <<"time: "<<time<<"[ms] ";
+		mpu.update();
+		std::cout<<" ax: "<<mpu.raw_a[0]<<" ay: "<<mpu.raw_a[1]<<" az: "<<mpu.raw_a[2];
+		std::cout<<" gx: "<<mpu.raw_g[0]<<" gy: "<<mpu.raw_g[1]<<" gz: "<<mpu.raw_g[2];
+		//std::cout<<" mx: "<<mpu.raw_m[0]<<" my: "<<mpu.raw_m[1]<<" mz: "<<mpu.raw_m[2];
+		std::cout<<" q0: "<<mpu.q0<<" q1: "<<mpu.q1<<" q2: "<<mpu.q2<<" q3: "<<mpu.q3;
+		std::cout<<" roll: "<<mpu.roll<<" pitch: "<<mpu.pitch<<" yaw: "<<mpu.yaw<<std::endl;
+		usleep(22000);
+		old = now;
 	}
 }
-

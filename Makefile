@@ -1,2 +1,2 @@
 all:
-	g++ -o main.out main.cpp -lrt -li2c -std=c++11
+	g++ main.cpp -o main.out -lrt -li2c -lm -std=c++11 -O3 -Wall
